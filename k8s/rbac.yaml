@@ -1,0 +1,71 @@
+# Namespace and identity senro uses to run pipeline steps as pods.
+# The permissions are exactly the ones senro's Kubernetes executor documents:
+# pods (create/get/delete), pods/log (get), pods/exec (create and get: senro
+# uses the WebSocket exec protocol, which is a GET on the subresource),
+# secrets (create/patch/delete) in the namespace, and nodes (list/get) at
+# cluster scope so senro can read the node platform.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: support
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: senro
+  namespace: support
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: senro-steps
+  namespace: support
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["create", "get", "delete"]
+  - apiGroups: [""]
+    resources: ["pods/log"]
+    verbs: ["get"]
+  - apiGroups: [""]
+    resources: ["pods/exec"]
+    verbs: ["create", "get"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["create", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: senro-steps
+  namespace: support
+subjects:
+  - kind: ServiceAccount
+    name: senro
+    namespace: support
+roleRef:
+  kind: Role
+  name: senro-steps
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: senro-nodes
+rules:
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["list", "get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: senro-nodes
+subjects:
+  - kind: ServiceAccount
+    name: senro
+    namespace: support
+roleRef:
+  kind: ClusterRole
+  name: senro-nodes
+  apiGroup: rbac.authorization.k8s.io

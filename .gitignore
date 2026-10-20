@@ -1,0 +1,5 @@
+runs/
+out/
+out-*/
+.kind/
+/genkit-k8s-flows-jev

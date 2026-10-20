@@ -1,0 +1,12 @@
+Subject: Webhooks returning 500 since this morning
+
+Hello,
+
+Since around 08:10 UTC every webhook delivery to our endpoint fails with a 500
+from your side. Request id from the dashboard: req_8f31c2. Our endpoint answers
+200 to manual calls, nothing changed on our end. Retries make it worse because
+we get the same event five times once it recovers.
+
+Can you have a look? Not blocking yet, we are replaying from the API.
+
+Jonas
